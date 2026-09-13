@@ -1,0 +1,82 @@
+{
+  // -----------------------------------------------------------------------
+  // benchmark.config.jsonc — Configuração simples da suíte de carga.
+  // Permite comentários e vírgulas finais (parser tolerante a JSONC).
+  //
+  // A ABORDAGEM de persistência é informada NA EXECUÇÃO, não aqui:
+  //   dotnet run -- multimodel       (ArangoDB)
+  //   dotnet run -- heterogeneous    (MongoDB + Neo4j)
+  // Ela define o rótulo do relatório (reports/<abordagem>/...) e quais
+  // containers Docker são monitorados.
+  // -----------------------------------------------------------------------
+
+  // URL base da API sob teste.
+  "baseUrl": "http://localhost:5000",
+
+  // Nível de carga. Cada nível é um ALVO de requests HTTP por segundo, somando todos
+  // os cenários ativos:
+  //   "low"    -> 100 req HTTP/s por 180s (~3 min)
+  //   "medium" -> 200 req HTTP/s por 300s (~5 min)
+  //   "high"   -> 350 req HTTP/s por 480s (~8 min)
+  //   "higher" -> 500 req HTTP/s por 600s (~10 min)
+  //
+  // Como o alvo chega ao NBomber: o Simulation.Inject recebe ITERAÇÕES/s por cenário,
+  // e cada iteração dispara vários requests sequenciais:
+  //     write_heavy 19 | read_heavy 11 | graph_heavy 14
+  //     document_heavy 8 | mixed_graph_documents 15   (= 67 por rodada com "all")
+  //
+  // A conversão alvo -> iterações/s é feita em tempo de execução pelo ThroughputPlanner,
+  // sobre os cenários REALMENTE selecionados. Ou seja, o alvo em req/s vale igual para
+  // "all" e para um cenário isolado; muda apenas a taxa de injeção resolvida.
+  //
+  // Plano resolvido com "scenario": "all":
+  //
+  //   nível     alvo    taxa por cenário               teórico
+  //   ------   -----    ---------------------------    ---------
+  //   low        100    write 2, graph 2, demais 1     100 req/s
+  //   medium     200    todos 3                        201 req/s
+  //   high       350    mixed 6, demais 5              350 req/s
+  //   higher     500    write 8, read 8, demais 7      499 req/s
+  //
+  // O teórico é rastreado pela aplicação: aparece no console no início da execução e é
+  // gravado em throughput.csv na pasta do relatório, lado a lado com o throughput REAL
+  // medido pelo NBomber e o percentual atingido.
+  //
+  // O teórico é um teto de injeção, não uma garantia de vazão. A injeção é open-loop:
+  // não espera as iterações anteriores terminarem. Quando a API satura, o excedente vira
+  // fila de conexões e depois reset de socket (SocketException 10054/10053), não
+  // throughput. Referência real: na execução medium_all de 2026-07-29, quando medium
+  // ainda injetava 20 iterações/s por cenário (~1.340 req/s teóricos), o register teve
+  // 24 s de latência média e ~80% de falha. Os alvos acima foram dimensionados para
+  // ficar dentro do que a API sustenta.
+  //
+  // As durações foram calibradas para o tempo de resposta real da API (10–50 s/request).
+  // Um ciclo write_heavy completo (19 steps sequenciais × ~15 s) precisa de pelo menos
+  // 165 s para garantir que as iterações concluam antes do fim do teste.
+  "loadLevel": "higher",
+
+  // Warm-up (segundos) descartado antes da medição. 0 desabilita.
+  "warmupSeconds": 5,
+
+  // Qual cenário rodar, por perspectiva de banco de dados:
+  //   "all"      -> todos os cenários
+  //   "write"    -> escrita intensiva
+  //   "read"     -> leitura intensiva
+  //   "graph"    -> grafo social (Neo4j)
+  //   "document" -> documentos (MongoDB)
+  //   "mixed"    -> mistura grafo + documentos
+  // Dica: rode um cenário por vez ("write", "read", ...) quando quiser
+  // atribuir o consumo de CPU/memória a uma única categoria.
+  "scenario": "all",
+
+  // Coleta de CPU/memória dos containers Docker durante a execução.
+  // Gera um arquivo resource-usage.csv dentro da pasta do relatório.
+  // Os containers monitorados são definidos pela abordagem informada na
+  // execução (multimodel -> arangodb; heterogeneous -> mongodb + neo4j).
+  // Observação: o NBomber só mede CPU/RAM da própria máquina de carga; o uso
+  // de CPU/RAM dos bancos vem exclusivamente deste resource-usage.csv.
+  "resourceMonitoring": {
+    "enabled": true,
+    "sampleIntervalSeconds": 2
+  }
+}

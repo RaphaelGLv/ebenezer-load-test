@@ -1,0 +1,97 @@
+scenario,endpoint,error_message,count
+document_heavy,01_register,409,1
+document_heavy,01_register,500,23
+document_heavy,01_register,An error occurred while sending the request.,1689
+document_heavy,02_create_category,500,6
+document_heavy,02_create_category,An error occurred while sending the request.,7
+document_heavy,03_create_prayer,500,19
+document_heavy,03_create_prayer,An error occurred while sending the request.,23
+document_heavy,04_get_prayer,500,1
+document_heavy,04_get_prayer,An error occurred while sending the request.,7
+document_heavy,05_update_prayer,500,3
+document_heavy,05_update_prayer,An error occurred while sending the request.,3
+document_heavy,06_search,500,1
+document_heavy,07_timeline,500,93
+document_heavy,07_timeline,An error occurred while sending the request.,14
+document_heavy,08_get_category,500,2
+document_heavy,08_get_category,An error occurred while sending the request.,7
+graph_heavy,01_register_a,409,1
+graph_heavy,01_register_a,500,31
+graph_heavy,01_register_a,An error occurred while sending the request.,1674
+graph_heavy,02_register_b,500,13
+graph_heavy,02_register_b,An error occurred while sending the request.,9
+graph_heavy,03_get_profile_b,500,7
+graph_heavy,03_get_profile_b,An error occurred while sending the request.,27
+graph_heavy,04_send_request,500,95
+graph_heavy,04_send_request,An error occurred while sending the request.,28
+graph_heavy,05_requests_to_me_b,500,40
+graph_heavy,05_requests_to_me_b,An error occurred while sending the request.,12
+graph_heavy,06_accept_request,500,15
+graph_heavy,06_accept_request,An error occurred while sending the request.,12
+graph_heavy,07_mutual_friends,500,4
+graph_heavy,07_mutual_friends,An error occurred while sending the request.,7
+graph_heavy,08_suggestions,500,4
+graph_heavy,08_suggestions,An error occurred while sending the request.,2
+graph_heavy,09_my_friendships,An error occurred while sending the request.,2
+mixed_graph_documents,01_register_a,409,1
+mixed_graph_documents,01_register_a,500,32
+mixed_graph_documents,01_register_a,An error occurred while sending the request.,2010
+mixed_graph_documents,02_login_a,500,1
+mixed_graph_documents,02_login_a,An error occurred while sending the request.,19
+mixed_graph_documents,03_register_b,500,16
+mixed_graph_documents,03_register_b,An error occurred while sending the request.,29
+mixed_graph_documents,04_get_profile_b,500,3
+mixed_graph_documents,04_get_profile_b,An error occurred while sending the request.,7
+mixed_graph_documents,05_create_prayer,500,5
+mixed_graph_documents,05_create_prayer,An error occurred while sending the request.,3
+mixed_graph_documents,06_send_request,500,108
+mixed_graph_documents,06_send_request,An error occurred while sending the request.,20
+mixed_graph_documents,07_accept_request,500,51
+mixed_graph_documents,07_accept_request,An error occurred while sending the request.,24
+mixed_graph_documents,08_timeline,500,7
+mixed_graph_documents,08_timeline,An error occurred while sending the request.,13
+mixed_graph_documents,09_mutual_friends,500,10
+mixed_graph_documents,09_mutual_friends,An error occurred while sending the request.,8
+mixed_graph_documents,10_search,An error occurred while sending the request.,2
+mixed_graph_documents,11_add_comment,An error occurred while sending the request.,1
+read_heavy,01_setup_register,500,20
+read_heavy,01_setup_register,An error occurred while sending the request.,1691
+read_heavy,02_setup_category,500,4
+read_heavy,02_setup_category,An error occurred while sending the request.,11
+read_heavy,03_setup_prayer,500,18
+read_heavy,03_setup_prayer,An error occurred while sending the request.,28
+read_heavy,04_get_prayer_by_id,500,1
+read_heavy,04_get_prayer_by_id,An error occurred while sending the request.,7
+read_heavy,05_timeline,500,85
+read_heavy,05_timeline,An error occurred while sending the request.,15
+read_heavy,06_search_by_text,500,5
+read_heavy,06_search_by_text,An error occurred while sending the request.,12
+read_heavy,07_search_by_author,500,4
+read_heavy,07_search_by_author,An error occurred while sending the request.,6
+read_heavy,08_get_category_by_id,An error occurred while sending the request.,1
+read_heavy,09_categories_by_username,An error occurred while sending the request.,2
+read_heavy,10_my_categories,An error occurred while sending the request.,2
+read_heavy,11_get_profile,An error occurred while sending the request.,2
+write_heavy,01_register,409,1
+write_heavy,01_register,500,29
+write_heavy,01_register,An error occurred while sending the request.,1672
+write_heavy,02_register_profile,500,5
+write_heavy,02_register_profile,An error occurred while sending the request.,11
+write_heavy,03_create_category,500,10
+write_heavy,03_create_category,An error occurred while sending the request.,7
+write_heavy,04_update_category,500,4
+write_heavy,04_update_category,An error occurred while sending the request.,20
+write_heavy,05_create_prayer,500,5
+write_heavy,05_create_prayer,An error occurred while sending the request.,6
+write_heavy,06_update_prayer,500,1
+write_heavy,06_update_prayer,An error occurred while sending the request.,4
+write_heavy,07_add_comment,500,2
+write_heavy,07_add_comment,An error occurred while sending the request.,2
+write_heavy,07b_get_comments_of_prayer,500,1
+write_heavy,07b_get_comments_of_prayer,An error occurred while sending the request.,3
+write_heavy,07d_add_sub_comment,500,1
+write_heavy,07e_get_sub_comments,500,1
+write_heavy,07e_get_sub_comments,An error occurred while sending the request.,2
+write_heavy,07f_delete_sub_comment,An error occurred while sending the request.,1
+write_heavy,07i_delete_comment,An error occurred while sending the request.,1
+write_heavy,10_delete_prayer,An error occurred while sending the request.,1

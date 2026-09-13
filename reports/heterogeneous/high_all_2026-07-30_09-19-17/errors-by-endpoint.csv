@@ -1,0 +1,31 @@
+scenario,endpoint,error_message,count
+document_heavy,01_register,409,14
+document_heavy,01_register,500,10
+document_heavy,01_register,An error occurred while sending the request.,138
+document_heavy,03_create_prayer,500,1
+graph_heavy,01_register_a,409,17
+graph_heavy,01_register_a,500,14
+graph_heavy,01_register_a,An error occurred while sending the request.,143
+graph_heavy,02_register_b,409,8
+graph_heavy,03_get_profile_b,500,1
+graph_heavy,09_my_friendships,500,1
+graph_heavy,10_remove_friend,500,1
+graph_heavy,11_send_to_cancel,500,1
+graph_heavy,13_send_to_decline,500,1
+mixed_graph_documents,01_register_a,409,12
+mixed_graph_documents,01_register_a,500,17
+mixed_graph_documents,01_register_a,An error occurred while sending the request.,163
+mixed_graph_documents,03_register_b,409,10
+mixed_graph_documents,03_register_b,500,1
+mixed_graph_documents,05_create_prayer,500,1
+read_heavy,01_setup_register,409,11
+read_heavy,01_setup_register,500,20
+read_heavy,01_setup_register,An error occurred while sending the request.,132
+read_heavy,06_search_by_text,500,1
+read_heavy,11_get_profile,500,1
+write_heavy,01_register,409,16
+write_heavy,01_register,500,16
+write_heavy,01_register,An error occurred while sending the request.,140
+write_heavy,05_create_prayer,500,1
+write_heavy,07d_add_sub_comment,500,1
+write_heavy,07g_add_reaction_to_comment,500,1

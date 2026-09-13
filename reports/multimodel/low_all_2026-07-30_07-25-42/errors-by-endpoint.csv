@@ -1,0 +1,4 @@
+scenario,endpoint,error_message,count
+document_heavy,01_register,409,1
+graph_heavy,01_register_a,409,1
+write_heavy,01_register,409,1

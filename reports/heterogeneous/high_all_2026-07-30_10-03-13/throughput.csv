@@ -1,0 +1,7 @@
+scenario,requests_per_iteration,injection_rate_iterations_per_second,theoretical_requests_per_second,actual_requests_per_second,attainment_percent,duration_seconds,theoretical_total_requests,actual_total_requests
+write_heavy,19,5,95,13.65,14.37,480,45600,6552
+read_heavy,11,5,55,6.87,12.49,480,26400,3298
+graph_heavy,14,5,70,5.85,8.35,480,33600,2806
+document_heavy,8,5,40,7.38,18.44,480,19200,3541
+mixed_graph_documents,15,6,90,8.37,9.30,480,43200,4018
+TOTAL,,26,350,42.11,12.03,480,168000,20215
