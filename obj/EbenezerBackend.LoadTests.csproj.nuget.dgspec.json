@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ebenezer\\EbenezerBackend.LoadTests\\EbenezerBackend.LoadTests.csproj": {}
+    "C:\\Users\\r.leiva_unesp\\Documents\\tcc\\ebenezer-load-test\\EbenezerBackend.LoadTests.csproj": {}
   },
   "projects": {
-    "D:\\ebenezer\\EbenezerBackend.LoadTests\\EbenezerBackend.LoadTests.csproj": {
+    "C:\\Users\\r.leiva_unesp\\Documents\\tcc\\ebenezer-load-test\\EbenezerBackend.LoadTests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ebenezer\\EbenezerBackend.LoadTests\\EbenezerBackend.LoadTests.csproj",
+        "projectUniqueName": "C:\\Users\\r.leiva_unesp\\Documents\\tcc\\ebenezer-load-test\\EbenezerBackend.LoadTests.csproj",
         "projectName": "EbenezerBackend.LoadTests",
-        "projectPath": "D:\\ebenezer\\EbenezerBackend.LoadTests\\EbenezerBackend.LoadTests.csproj",
-        "packagesPath": "C:\\Users\\rapha\\.nuget\\packages\\",
-        "outputPath": "D:\\ebenezer\\EbenezerBackend.LoadTests\\obj\\",
+        "projectPath": "C:\\Users\\r.leiva_unesp\\Documents\\tcc\\ebenezer-load-test\\EbenezerBackend.LoadTests.csproj",
+        "packagesPath": "C:\\Users\\r.leiva_unesp\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\r.leiva_unesp\\Documents\\tcc\\ebenezer-load-test\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\rapha\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\r.leiva_unesp\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -24,6 +24,7 @@
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -38,10 +39,11 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Bogus": {
@@ -115,7 +117,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
