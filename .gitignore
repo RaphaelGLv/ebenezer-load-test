@@ -1,0 +1,12 @@
+# Saída de build
+bin/
+obj/
+
+# IDEs
+.vs/
+.idea/
+*.user
+
+# Resultados de rodadas (gerados a cada execução). As rodadas antigas não são mais
+# necessárias; para versionar os resultados finais do TCC, use `git add -f reports/<pasta>`.
+reports/

@@ -1,6 +1,0 @@
-scenario,endpoint,error_message,count
-document_heavy,01_register,409,2
-graph_heavy,01_register_a,409,1
-graph_heavy,02_register_b,409,1
-read_heavy,01_setup_register,409,2
-write_heavy,01_register,409,2
