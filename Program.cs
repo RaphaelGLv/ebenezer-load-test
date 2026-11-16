@@ -113,9 +113,10 @@ static StringContent Json(object payload) =>
 
 static string NewUserName(Faker f)
 {
-    var raw = f.Internet.UserName().ToLowerInvariant() + Guid.NewGuid().ToString("N")[..6];
-    var clean = new string(raw.Where(char.IsLetterOrDigit).ToArray());
-    return clean[..Math.Min(20, clean.Length)];
+    var prefix = Guid.NewGuid().ToString("N")[..8];
+    var cleanName = new string(f.Internet.UserName().ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
+    var combined = $"{prefix}{cleanName}";
+    return combined[..Math.Min(20, combined.Length)];
 }
 
 static string? ReadProp(string json, string prop)
