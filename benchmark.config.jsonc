@@ -73,10 +73,10 @@
   //
   // As durações dão tempo para o platô estabilizar e para a base crescer; não dependem
   // mais do tempo de uma iteração (dezenas de ms por request com a API saudável).
-  "loadLevel": "higher",
+  "loadLevel": "low",
 
   // Warm-up (segundos) descartado antes da medição. 0 desabilita.
-  "warmupSeconds": 5,
+  "warmupSeconds": 30,
 
   // Qual cenário rodar, por perspectiva de banco de dados:
   //   "all"      -> todos os cenários
