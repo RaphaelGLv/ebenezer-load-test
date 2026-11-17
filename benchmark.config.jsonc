@@ -15,10 +15,10 @@
 
   // Nível de carga. Cada nível é um ALVO de requests HTTP por segundo, somando todos
   // os cenários ativos:
-  //   "low"    -> 100 req HTTP/s por 180s (~3 min)
-  //   "medium" -> 200 req HTTP/s por 300s (~5 min)
-  //   "high"   -> 350 req HTTP/s por 480s (~8 min)
-  //   "higher" -> 500 req HTTP/s por 600s (~10 min)
+  //   "low"    ->  500 req HTTP/s por  300s (~5 min)
+  //   "medium" -> 1000 req HTTP/s por  600s (~10 min)
+  //   "high"   -> 2000 req HTTP/s por  900s (~15 min)
+  //   "higher" -> 4000 req HTTP/s por 1200s (~20 min)
   //
   // Como o alvo chega ao NBomber: o Simulation.Inject recebe ITERAÇÕES/s por cenário,
   // e cada iteração dispara vários requests sequenciais:
@@ -31,12 +31,24 @@
   //
   // Plano resolvido com "scenario": "all":
   //
-  //   nível     alvo    taxa por cenário               teórico
-  //   ------   -----    ---------------------------    ---------
-  //   low        100    write 2, graph 2, demais 1     100 req/s
-  //   medium     200    todos 3                        201 req/s
-  //   high       350    mixed 6, demais 5              350 req/s
-  //   higher     500    write 8, read 8, demais 7      499 req/s
+  //   nível     alvo    taxa por cenário (it/s)                  teórico     usuários/s
+  //   ------   -----    -------------------------------------    --------    ----------
+  //   low        500    write 8, read 8, graph 7, doc 7, mix 7     499 req/s      51
+  //   medium    1000    doc 14, demais 15                          997 req/s     104
+  //   high      2000    read 29, demais 30                        1999 req/s     209
+  //   higher    4000    read 59, doc 59, demais 60                4001 req/s     418
+  //
+  // "usuários/s" é o ritmo de POST /auth/register (write 1, read 1, graph 2, document 1,
+  // mixed 2 por iteração). Multiplicado pela duração, é o tamanho da base de usuários ao
+  // fim da execução (low 15.300, medium 62.400, high 188.100, higher 501.600), e as
+  // coleções de orações, amizades e comentários crescem junto. Endpoints sem paginação ou
+  // com custo proporcional ao tamanho da base degradam mais nos níveis altos.
+  //
+  // A conta, em uma linha:  req/s = soma sobre os cenários de (it/s x requests por it).
+  // Cada passo de +1 it/s em todos os cenários soma 67 req/s ("all"). Como o planejador
+  // só usa taxas inteiras, o teórico erra no máximo poucos req/s (<0,5% nestes níveis);
+  // o erro relativo é maior em alvos baixos. Conferir sempre a linha "Plano de carga" do
+  // console e o attainment_percent de throughput.csv.
   //
   // O teórico é rastreado pela aplicação: aparece no console no início da execução e é
   // gravado em throughput.csv na pasta do relatório, lado a lado com o throughput REAL
@@ -47,12 +59,20 @@
   // fila de conexões e depois reset de socket (SocketException 10054/10053), não
   // throughput. Referência real: na execução medium_all de 2026-07-29, quando medium
   // ainda injetava 20 iterações/s por cenário (~1.340 req/s teóricos), o register teve
-  // 24 s de latência média e ~80% de falha. Os alvos acima foram dimensionados para
-  // ficar dentro do que a API sustenta.
+  // 24 s de latência média e ~80% de falha. Hoje "low" (500 req/s) é o nível já
+  // sustentado pelas duas abordagens; "medium", "high" e "higher" foram feitos para
+  // aproximar e superar a capacidade, então saturação nesses níveis é um resultado
+  // esperado do experimento, não necessariamente um erro de configuração.
   //
-  // As durações foram calibradas para o tempo de resposta real da API (10–50 s/request).
-  // Um ciclo write_heavy completo (19 steps sequenciais × ~15 s) precisa de pelo menos
-  // 165 s para garantir que as iterações concluam antes do fim do teste.
+  // Limites do gerador de carga a observar nos níveis altos (Lei de Little: requests em
+  // voo = req/s x latência média): o HttpClient é único, com timeout de 600 s e sem
+  // limite de conexões por servidor. Se a latência explodir, as conexões em voo crescem
+  // até esgotar as portas efêmeras do Windows (~16 mil), e aí os erros deixam de refletir
+  // a API. O gerador também divide a CPU do host com os contêineres; confirme que ele não
+  // é o gargalo antes de atribuir a saturação a uma abordagem.
+  //
+  // As durações dão tempo para o platô estabilizar e para a base crescer; não dependem
+  // mais do tempo de uma iteração (dezenas de ms por request com a API saudável).
   "loadLevel": "higher",
 
   // Warm-up (segundos) descartado antes da medição. 0 desabilita.

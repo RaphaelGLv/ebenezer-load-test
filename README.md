@@ -35,9 +35,9 @@ Se omitir a abordagem, o programa imprime uma mensagem de uso e encerra com cód
 
 ### Aliases aceitos
 
-| Que você digita | Interpretado como |
-|---|---|
-| `multimodel`, `multimodelo`, `arangodb` | multimodel (ArangoDB) |
+| Que você digita                                                | Interpretado como               |
+| -------------------------------------------------------------- | ------------------------------- |
+| `multimodel`, `multimodelo`, `arangodb`                        | multimodel (ArangoDB)           |
 | `heterogeneous`, `heterogeneo`, `mongodb-neo4j`, `mongo-neo4j` | heterogeneous (MongoDB + Neo4j) |
 
 ---
@@ -79,16 +79,16 @@ O arquivo aceita comentários (`//`) e vírgulas finais. Todos os parâmetros t�
 {
   "baseUrl": "http://localhost:5000", // URL da API sob teste
 
-  "loadLevel": "medium",  // low | medium | high | higher (ver tabela abaixo)
+  "loadLevel": "medium", // low | medium | high | higher (ver tabela abaixo)
 
-  "warmupSeconds": 5,     // segundos descartados antes da medição; 0 desabilita
+  "warmupSeconds": 5, // segundos descartados antes da medição; 0 desabilita
 
-  "scenario": "all",      // all | write | read | graph | document | mixed
+  "scenario": "all", // all | write | read | graph | document | mixed
 
   "resourceMonitoring": {
     "enabled": true,
-    "sampleIntervalSeconds": 2
-  }
+    "sampleIntervalSeconds": 2,
+  },
 }
 ```
 
@@ -97,6 +97,7 @@ O arquivo aceita comentários (`//`) e vírgulas finais. Todos os parâmetros t�
 Porque ela muda a cada rodada de comparação (você alterna entre as branches) e é fácil esquecer de editar um arquivo antes de rodar. Colocar na linha de comando força consciência: você vê o que está medindo antes de apertar Enter.
 
 Os containers Docker monitorados são derivados automaticamente da abordagem:
+
 - `multimodel` → monitora `arangodb`
 - `heterogeneous` → monitora `ebenezer-mongodb` e `ebenezer-neo4j`
 
@@ -106,12 +107,18 @@ Assim o config nunca precisa mudar entre branches.
 
 Cada nível é um **alvo de requests HTTP por segundo**, somando todos os cenários ativos:
 
-| Nível | Alvo (req HTTP/s) | Duração | Teórico resolvido com `all` |
-|---|---|---|---|
-| `low` | 100 | 180 s | 100 req/s |
-| `medium` | 200 | 300 s | 201 req/s |
-| `high` | 350 | 480 s | 350 req/s |
-| `higher` | 500 | 600 s | 499 req/s |
+| Nível    | Alvo (req HTTP/s) | Duração          | Teórico resolvido com `all` | Usuários cadastrados/s | Usuários ao fim |
+| -------- | ----------------- | ---------------- | --------------------------- | ---------------------- | --------------- |
+| `low`    | 500               | 300 s (5 min)    | 499 req/s                   | 51                     | 15.300          |
+| `medium` | 1.000             | 600 s (10 min)   | 997 req/s                   | 104                    | 62.400          |
+| `high`   | 2.000             | 900 s (15 min)   | 1.999 req/s                 | 209                    | 188.100         |
+| `higher` | 4.000             | 1.200 s (20 min) | 4.001 req/s                 | 418                    | 501.600         |
+
+**Como a conta fecha.** O que chega na API é `req/s = Σ (iterações/s do cenário × requests por iteração)`. Com `all`, cada +1 iteração/s em todos os cenários soma 67 req/s (19 + 11 + 14 + 8 + 15). O planejador só usa taxas inteiras, então o teórico erra por poucos req/s; por exemplo, `higher` fica com `write 60, read 59, graph 60, document 59, mixed 60` = 4.001 req/s. Usuários cadastrados/s é o ritmo de `POST /auth/register` por iteração (write 1, read 1, graph 2, document 1, mixed 2), e multiplicado pela duração é o tamanho da base de usuários ao fim.
+
+**Escala de referência.** Os alvos são ordens de grandeza, não números de mercado medidos. Assumindo ~100 requests por usuário ativo/dia e pico de 3x a média, `DAU ≈ pico req/s × 288`: `low` ≈ 144 mil, `medium` ≈ 288 mil, `high` ≈ 576 mil e `higher` ≈ 1,15 milhão de usuários ativos por dia. As durações (5 a 20 min de platô) seguem a prática de testes de carga de média duração; testes de soak, de horas, ficam fora do escopo.
+
+**Concorrência no gerador.** Pela Lei de Little, requests em voo = req/s × latência média. A 4.000 req/s com 50 ms são ~200 requests simultâneos, mas com 5 s de latência são ~20.000, acima das ~16 mil portas efêmeras padrão do Windows. Em saturação, os erros de socket podem vir do gerador e não da API.
 
 **Por que o alvo é em requests/s e não na taxa do `Simulation.Inject`?**
 Porque o `Inject` recebe **iterações por segundo de um cenário**, e cada iteração dispara vários requests HTTP sequenciais (`write` 19, `read` 11, `graph` 14, `document` 8, `mixed` 15 — 67 por rodada com `all`). Configurar o Inject diretamente esconde duas multiplicações: o número de cenários em paralelo e o número de steps por iteração. Com `"scenario": "all"` e taxa 20, por exemplo, o que chega na API são ~1.340 req/s, não 20.
@@ -127,17 +134,17 @@ A injeção é **open-loop**: mantém a taxa alvo independentemente da latência
 
 O plano de carga resolvido é impresso no console antes da execução e, no fim, gravado em `throughput.csv` na pasta do relatório:
 
-| Coluna | Significado |
-|---|---|
-| `scenario` | nome do cenário (mais uma linha `TOTAL`) |
-| `requests_per_iteration` | requests HTTP que uma iteração completa dispara |
-| `injection_rate_iterations_per_second` | taxa resolvida e passada ao `Simulation.Inject` |
-| `theoretical_requests_per_second` | `requests_per_iteration × injection_rate` |
-| `actual_requests_per_second` | throughput real medido pelo NBomber (soma dos steps ok + fail) |
-| `attainment_percent` | real ÷ teórico × 100 |
-| `duration_seconds` | duração da fase de medição |
-| `theoretical_total_requests` | volume teórico na duração completa |
-| `actual_total_requests` | requests HTTP efetivamente concluídos |
+| Coluna                                 | Significado                                                    |
+| -------------------------------------- | -------------------------------------------------------------- |
+| `scenario`                             | nome do cenário (mais uma linha `TOTAL`)                       |
+| `requests_per_iteration`               | requests HTTP que uma iteração completa dispara                |
+| `injection_rate_iterations_per_second` | taxa resolvida e passada ao `Simulation.Inject`                |
+| `theoretical_requests_per_second`      | `requests_per_iteration × injection_rate`                      |
+| `actual_requests_per_second`           | throughput real medido pelo NBomber (soma dos steps ok + fail) |
+| `attainment_percent`                   | real ÷ teórico × 100                                           |
+| `duration_seconds`                     | duração da fase de medição                                     |
+| `theoretical_total_requests`           | volume teórico na duração completa                             |
+| `actual_total_requests`                | requests HTTP efetivamente concluídos                          |
 
 `attainment_percent` bem abaixo de 100% indica saturação: a API não absorveu a carga pedida, e os percentis de latência do HTML devem ser lidos como métrica de fila, não de tempo de resposta em estado estável.
 
@@ -160,27 +167,27 @@ Cada cenário é categorizado pela perspectiva do banco de dados que ele mais ex
 
 Exercita o caminho de gravação puro: criação e atualização de todas as entidades documentais, incluindo o ciclo completo de comentários.
 
-| Passo | Endpoint |
-|---|---|
-| 01 | `POST /auth/register` |
-| 02 | `POST /profile/new` |
-| 03 | `POST /categories/new` |
-| 04 | `PUT /categories/{id}` |
-| 05 | `POST /prayers/new` |
-| 06 | `PUT /prayers/{id}` |
-| 07 | `POST /comments/prayer/{id}` |
-| 07b | `GET /comments/prayer/{id}?page=1&pageSize=10` |
-| 07c | `PUT /comments/{commentId}` |
-| 07d | `POST /comments/comment/{commentId}` (sub-comentário) |
-| 07e | `GET /comments/comment/{commentId}?page=1&pageSize=10` |
-| 07f | `DELETE /comments/{subCommentId}` |
-| 07g | `POST /comments/{commentId}/support` |
-| 07h | `POST /comments/{commentId}/remove-support` |
-| 07i | `DELETE /comments/{commentId}` |
-| 08 | `POST /prayers/{id}/support` |
-| 09 | `POST /prayers/{id}/support-remove` |
-| 10 | `DELETE /prayers/{id}` |
-| 11 | `DELETE /categories/{id}` |
+| Passo | Endpoint                                               |
+| ----- | ------------------------------------------------------ |
+| 01    | `POST /auth/register`                                  |
+| 02    | `POST /profile/new`                                    |
+| 03    | `POST /categories/new`                                 |
+| 04    | `PUT /categories/{id}`                                 |
+| 05    | `POST /prayers/new`                                    |
+| 06    | `PUT /prayers/{id}`                                    |
+| 07    | `POST /comments/prayer/{id}`                           |
+| 07b   | `GET /comments/prayer/{id}?page=1&pageSize=10`         |
+| 07c   | `PUT /comments/{commentId}`                            |
+| 07d   | `POST /comments/comment/{commentId}` (sub-comentário)  |
+| 07e   | `GET /comments/comment/{commentId}?page=1&pageSize=10` |
+| 07f   | `DELETE /comments/{subCommentId}`                      |
+| 07g   | `POST /comments/{commentId}/support`                   |
+| 07h   | `POST /comments/{commentId}/remove-support`            |
+| 07i   | `DELETE /comments/{commentId}`                         |
+| 08    | `POST /prayers/{id}/support`                           |
+| 09    | `POST /prayers/{id}/support-remove`                    |
+| 10    | `DELETE /prayers/{id}`                                 |
+| 11    | `DELETE /categories/{id}`                              |
 
 **Por que esse cenário existe?**
 Escrever em ArangoDB (uma coleção de documentos + arestas em um único banco) tem um perfil de I/O diferente de escrever em MongoDB (documento) enquanto o Neo4j permanece inalterado. Isolar as escritas deixa claro qual abordagem tem menor latência e maior throughput de escrita. O ciclo completo de comentários (criar → listar → editar → sub-comentar → reagir → excluir) exercita intensamente as edge collections `CommentedOn` e `ReactedBy` do ArangoDB.
@@ -191,17 +198,17 @@ Escrever em ArangoDB (uma coleção de documentos + arestas em um único banco) 
 
 Setup mínimo de dados seguido exclusivamente de leituras — o padrão dominante de uma rede social em produção.
 
-| Passo | Endpoint |
-|---|---|
-| 01–03 | Setup: register + categoria + oração |
-| 04 | `GET /prayers/{id}` |
-| 05 | `GET /prayers/timeline` |
-| 06 | `GET /prayers/search?Text=...` |
-| 07 | `GET /prayers/search?AuthorUserName=...` |
-| 08 | `GET /categories/{id}` |
-| 09 | `GET /categories/user/{username}` |
-| 10 | `GET /categories/mine` |
-| 11 | `GET /profile/{username}` |
+| Passo | Endpoint                                 |
+| ----- | ---------------------------------------- |
+| 01–03 | Setup: register + categoria + oração     |
+| 04    | `GET /prayers/{id}`                      |
+| 05    | `GET /prayers/timeline`                  |
+| 06    | `GET /prayers/search?Text=...`           |
+| 07    | `GET /prayers/search?AuthorUserName=...` |
+| 08    | `GET /categories/{id}`                   |
+| 09    | `GET /categories/user/{username}`        |
+| 10    | `GET /categories/mine`                   |
+| 11    | `GET /profile/{username}`                |
 
 **Por que esse cenário existe?**
 Leituras em ArangoDB usam AQL sobre document collections. Leituras em MongoDB usam find/aggregate sobre collections separadas. Sob carga alta, o comportamento de índices e o custo de serialização divergem entre os dois. Este cenário isola esse custo.
@@ -212,19 +219,19 @@ Leituras em ArangoDB usam AQL sobre document collections. Leituras em MongoDB us
 
 Ciclo completo de amizade entre dois usuários, cobrindo todos os estados possíveis de um relacionamento.
 
-| Passo | Endpoint |
-|---|---|
-| 01–02 | Register A e B |
-| 03 | `GET /profile/{username}` (obter ID de B) |
-| 04 | `POST /friendships/request` |
-| 05 | `GET /friendships/requests/to-me` |
-| 06 | `POST /friendships/{id}/accept` |
-| 07 | `GET /friendships/my-mutual-friends-with/{id}` |
-| 08 | `GET /friendships/suggestions` |
-| 09 | `GET /friendships` |
-| 10 | `POST /friendships/{id}/remove` |
-| 11–12 | Enviar e cancelar pedido |
-| 13–14 | Enviar e recusar pedido |
+| Passo | Endpoint                                       |
+| ----- | ---------------------------------------------- |
+| 01–02 | Register A e B                                 |
+| 03    | `GET /profile/{username}` (obter ID de B)      |
+| 04    | `POST /friendships/request`                    |
+| 05    | `GET /friendships/requests/to-me`              |
+| 06    | `POST /friendships/{id}/accept`                |
+| 07    | `GET /friendships/my-mutual-friends-with/{id}` |
+| 08    | `GET /friendships/suggestions`                 |
+| 09    | `GET /friendships`                             |
+| 10    | `POST /friendships/{id}/remove`                |
+| 11–12 | Enviar e cancelar pedido                       |
+| 13–14 | Enviar e recusar pedido                        |
 
 **Por que esse cenário existe?**
 É o cenário que mais diferencia as abordagens. Na abordagem heterogênea, toda operação de amizade cruza o Neo4j (traversal de grafo). Na abordagem multimodelo, ArangoDB usa edge collections. A diferença de latência e throughput aqui tende a ser a mais expressiva do TCC.
@@ -238,16 +245,16 @@ Porque reusar usuários com estado de amizade acumulado criaria dependências en
 
 Foco nas operações CRUD sobre entidades documentais (categorias e orações) sem envolver o grafo.
 
-| Passo | Endpoint |
-|---|---|
-| 01 | Register |
-| 02 | `POST /categories/new` |
-| 03 | `POST /prayers/new` |
-| 04 | `GET /prayers/{id}` |
-| 05 | `PUT /prayers/{id}` |
-| 06 | `GET /prayers/search` |
-| 07 | `GET /prayers/timeline` |
-| 08 | `GET /categories/{id}` |
+| Passo | Endpoint                |
+| ----- | ----------------------- |
+| 01    | Register                |
+| 02    | `POST /categories/new`  |
+| 03    | `POST /prayers/new`     |
+| 04    | `GET /prayers/{id}`     |
+| 05    | `PUT /prayers/{id}`     |
+| 06    | `GET /prayers/search`   |
+| 07    | `GET /prayers/timeline` |
+| 08    | `GET /categories/{id}`  |
 
 **Por que esse cenário existe separado do `write`?**
 O `write` tem DELETE e cobre o ciclo completo (criar → destruir). Este cenário isola especificamente o throughput de leitura e escrita de documentos sem a pressão das exclusões, que têm comportamento diferente nos dois bancos.
@@ -258,23 +265,23 @@ O `write` tem DELETE e cobre o ciclo completo (criar → destruir). Este cenári
 
 Jornada de usuário realista que cruza os dois stores: cria conteúdo (MongoDB/ArangoDB) e forma vínculos sociais (Neo4j/ArangoDB) na mesma iteração, incluindo retrospectiva e interações de comentário.
 
-| Passo | Endpoint |
-|---|---|
-| 01 | Register A |
-| 02 | `POST /auth/login` |
-| 03 | Register B |
-| 04 | `GET /profile/{username}` |
-| 05 | `POST /prayers/new` |
-| 06 | `POST /friendships/request` |
-| 07 | `POST /friendships/{id}/accept` |
-| 08 | `GET /prayers/timeline` |
-| 09 | `GET /friendships/my-mutual-friends-with/{id}` |
-| 10 | `GET /prayers/search` |
-| 11 | `POST /comments/prayer/{prayerId}` |
-| 11b | `GET /comments/prayer/{prayerId}?page=1&pageSize=10` |
-| 11c | `POST /comments/{commentId}/support` |
-| 11d | `POST /comments/{commentId}/remove-support` |
-| 12 | `GET /retrospective/my-retrospective` |
+| Passo | Endpoint                                             |
+| ----- | ---------------------------------------------------- |
+| 01    | Register A                                           |
+| 02    | `POST /auth/login`                                   |
+| 03    | Register B                                           |
+| 04    | `GET /profile/{username}`                            |
+| 05    | `POST /prayers/new`                                  |
+| 06    | `POST /friendships/request`                          |
+| 07    | `POST /friendships/{id}/accept`                      |
+| 08    | `GET /prayers/timeline`                              |
+| 09    | `GET /friendships/my-mutual-friends-with/{id}`       |
+| 10    | `GET /prayers/search`                                |
+| 11    | `POST /comments/prayer/{prayerId}`                   |
+| 11b   | `GET /comments/prayer/{prayerId}?page=1&pageSize=10` |
+| 11c   | `POST /comments/{commentId}/support`                 |
+| 11d   | `POST /comments/{commentId}/remove-support`          |
+| 12    | `GET /retrospective/my-retrospective`                |
 
 **Por que esse cenário existe?**
 Na abordagem heterogênea, operações cross-store têm custo de coordenação entre MongoDB e Neo4j dentro do mesmo request. ArangoDB executa tudo em um único banco, evitando esse round-trip. Esse cenário captura exatamente esse custo de coordenação — que pode ser a diferença mais relevante para o TCC.

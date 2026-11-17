@@ -65,10 +65,10 @@ public sealed record ThroughputPlan(
 ///
 ///   nível     alvo    taxa por cenário                      teórico
 ///   ------   -----    ----------------------------------    -------
-///   low        100    write 2, graph 2, demais 1            100 req/s
-///   medium     200    todos 3                               201 req/s
-///   high       350    mixed 6, demais 5                     350 req/s
-///   higher     500    write 8, read 8, demais 7             499 req/s
+///   low        500    write 8, read 8, demais 7             499 req/s
+///   medium    1000    document 14, demais 15                997 req/s
+///   high      2000    read 29, demais 30                   1999 req/s
+///   higher    4000    read 59, document 59, demais 60      4001 req/s
 /// </summary>
 public static class ThroughputPlanner
 {

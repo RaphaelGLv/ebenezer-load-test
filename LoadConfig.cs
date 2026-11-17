@@ -92,12 +92,24 @@ public sealed record LoadConfig
 ///
 /// Alvos (requests HTTP/s teóricos, somando os cenários ativos):
 ///
-///   nível     alvo     duração
-///   ------   -----     -------
-///   low        100        180 s
-///   medium     200        300 s
-///   high       350        480 s
-///   higher     500        600 s
+///   nível     alvo     duração     teórico com "all"
+///   ------   -----     -------     -----------------
+///   low        500       300 s            499 req/s
+///   medium    1000       600 s            997 req/s
+///   high      2000       900 s          1.999 req/s
+///   higher    4000      1200 s          4.001 req/s
+///
+/// A escada começa em 500 req/s, que é o antigo nível "higher" e já foi sustentado pelas
+/// duas abordagens, e dobra a cada nível. Os alvos equivalem, em ordem de grandeza, a
+/// ~144 mil, ~288 mil, ~576 mil e ~1,15 milhão de usuários ativos por dia, assumindo ~100
+/// requests por usuário/dia e pico de 3x a média (DAU ≈ pico req/s x 288). As durações
+/// (5 a 20 min de platô) seguem a prática de testes de carga de média duração: tempo
+/// suficiente para o platô estabilizar e para a base crescer de forma relevante, sem virar
+/// teste de soak.
+///
+/// Relação com concorrência (Lei de Little): requests em voo = req/s x latência média.
+/// A 4.000 req/s com 50 ms de latência são ~200 requests simultâneos; se a latência subir
+/// para 5 s, são ~20.000, acima das ~16 mil portas efêmeras padrão do Windows.
 ///
 /// O plano resolvido (taxa por cenário e teórico atingido) é impresso no console e
 /// gravado em <c>throughput.csv</c> na pasta do relatório, junto do throughput real
@@ -109,23 +121,25 @@ public sealed record LoadConfig
 /// na execução medium_all de 2026-07-29 (quando o nível medium injetava 20 iterações/s
 /// por cenário, ~1.340 requests/s teóricos) o register mediu 24 s de latência média e
 /// ~80% de falha com SocketException 10054/10053; a vazão real ficou em ~2 iterações
-/// completas/s por cenário. Os alvos acima foram dimensionados para ficar dentro do que
-/// a API consegue sustentar.
+/// completas/s por cenário. O nível "low" fica dentro do que as duas abordagens já
+/// sustentaram; os níveis acima dele podem saturar uma das abordagens, e é isso que o
+/// <c>attainment_percent</c> de <c>throughput.csv</c> deve revelar.
 /// </summary>
 public sealed record LoadProfile(string Name, int TargetRequestsPerSecond, int DurationSeconds)
 {
     public static LoadProfile For(string level) => (level ?? string.Empty).Trim().ToLowerInvariant() switch
     {
-        // Durações calibradas para o tempo de resposta real da API (10–50 s/request).
-        // Um ciclo write_heavy completo tem 19 steps sequenciais. Com ~15 s médios cada,
-        // precisa de pelo menos 165 s para garantir que as iterações consigam completar.
-        //
         // 2º parâmetro = ALVO de requests HTTP/s somando os cenários ativos.
+        // 3º parâmetro = duração da fase de medição, sem contar o warm-up.
+        //
+        // Com a API saudável (dezenas de ms por request), a iteração mais longa (write_heavy,
+        // 19 steps) termina em poucos segundos, então as durações abaixo são dimensionadas
+        // pelo volume e pelo crescimento da base, não pelo tempo de uma iteração.
         //                                  alvo   dur
-        "low"    => new LoadProfile("low",    100,  180),
-        "medium" => new LoadProfile("medium", 200,  300),
-        "high"   => new LoadProfile("high",   350,  480),
-        "higher" => new LoadProfile("higher", 500,  600),
+        "low"    => new LoadProfile("low",     500,   300),
+        "medium" => new LoadProfile("medium", 1000,   600),
+        "high"   => new LoadProfile("high",   2000,   900),
+        "higher" => new LoadProfile("higher", 4000,  1200),
         _ => throw new ArgumentException(
             $"Nível de carga desconhecido: '{level}'. Use: low | medium | high | higher.")
     };
