@@ -136,11 +136,14 @@ public sealed record LoadProfile(string Name, int TargetRequestsPerSecond, int D
         // 19 steps) termina em poucos segundos, então as durações abaixo são dimensionadas
         // pelo volume e pelo crescimento da base, não pelo tempo de uma iteração.
         //                                  alvo   dur
+        // Validacao rapida: 1 iteracao/s por cenario por 20 s. Serve so para confirmar que os cenarios
+        // rodam de ponta a ponta; nao use os numeros dela como resultado de benchmark.
+        "smoke"  => new LoadProfile("smoke",    67,    20),
         "low"    => new LoadProfile("low",     500,   300),
         "medium" => new LoadProfile("medium", 1000,   600),
         "high"   => new LoadProfile("high",   2000,   900),
         "higher" => new LoadProfile("higher", 4000,  1200),
         _ => throw new ArgumentException(
-            $"Nível de carga desconhecido: '{level}'. Use: low | medium | high | higher.")
+            $"Nível de carga desconhecido: '{level}'. Use: smoke | low | medium | high | higher.")
     };
 }

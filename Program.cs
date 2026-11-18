@@ -472,7 +472,7 @@ var readHeavy = Scenario.Create("read_heavy", async context =>
     {
         await Step.Run("04_get_prayer_by_id", context, async () =>
         {
-            var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/{prayerId}");
+            var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/{prayerId}", token);
             return ok ? Response.Ok(statusCode: statusCode, sizeBytes: bytes) : Response.Fail(statusCode: statusCode.ToString());
         });
     }
@@ -489,13 +489,13 @@ var readHeavy = Scenario.Create("read_heavy", async context =>
 
     await Step.Run("06_search_by_text", context, async () =>
     {
-        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=10&Text={f.Lorem.Word()}");
+        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=10&Text={f.Lorem.Word()}", token);
         return ok ? Response.Ok(statusCode: statusCode, sizeBytes: bytes) : Response.Fail(statusCode: statusCode.ToString());
     });
 
     await Step.Run("07_search_by_author", context, async () =>
     {
-        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=10&AuthorUserName={userName}");
+        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=10&AuthorUserName={userName}", token);
         return ok ? Response.Ok(statusCode: statusCode, sizeBytes: bytes) : Response.Fail(statusCode: statusCode.ToString());
     });
 
@@ -785,7 +785,7 @@ var documentHeavy = Scenario.Create("document_heavy", async context =>
     {
         await Step.Run("04_get_prayer", context, async () =>
         {
-            var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/{prayerId}");
+            var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/{prayerId}", token);
             return ok ? Response.Ok(statusCode: statusCode, sizeBytes: bytes) : Response.Fail(statusCode: statusCode.ToString());
         });
 
@@ -807,7 +807,7 @@ var documentHeavy = Scenario.Create("document_heavy", async context =>
 
     await Step.Run("06_search", context, async () =>
     {
-        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=20&Text={f.Lorem.Word()}");
+        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=20&Text={f.Lorem.Word()}", token);
         return ok ? Response.Ok(statusCode: statusCode, sizeBytes: bytes) : Response.Fail(statusCode: statusCode.ToString());
     });
 
@@ -967,7 +967,7 @@ var mixed = Scenario.Create("mixed_graph_documents", async context =>
 
     await Step.Run("10_search", context, async () =>
     {
-        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=10&Text={f.Lorem.Word()}");
+        var (ok, _, bytes, statusCode) = await Call(HttpMethod.Get, $"/prayers/search?Pagination.Page=1&Pagination.PageSize=10&Text={f.Lorem.Word()}", tokenA);
         return ok ? Response.Ok(statusCode: statusCode, sizeBytes: bytes) : Response.Fail(statusCode: statusCode.ToString());
     });
 
