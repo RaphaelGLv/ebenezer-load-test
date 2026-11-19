@@ -92,11 +92,13 @@
   // Coleta de CPU/memória dos containers Docker durante a execução.
   // Gera um arquivo resource-usage.csv dentro da pasta do relatório.
   // Os containers monitorados são definidos pela abordagem informada na
-  // execução (multimodel -> arangodb; heterogeneous -> mongodb + neo4j).
+  // execução, e a API (ebenezer-api) entra nas duas:
+  //   multimodel    -> ebenezer-api + arangodb
+  //   heterogeneous -> ebenezer-api + mongodb + neo4j
   // Observação: o NBomber só mede CPU/RAM da própria máquina de carga; o uso
-  // de CPU/RAM dos bancos vem exclusivamente deste resource-usage.csv.
+  // de CPU/RAM da API e dos bancos vem exclusivamente deste resource-usage.csv.
   "resourceMonitoring": {
     "enabled": true,
-    "sampleIntervalSeconds": 2
-  }
+    "sampleIntervalSeconds": 2,
+  },
 }

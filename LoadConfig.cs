@@ -16,17 +16,21 @@ public sealed record ResourceMonitoringConfig
 
 /// <summary>
 /// Abordagem de persistência sob teste, informada na execução do script.
-/// Define o rótulo do relatório e quais containers Docker monitorar.
+/// Define o rótulo do relatório e quais containers Docker monitorar: a API (igual nas duas
+/// abordagens) e os bancos de cada uma. O nome da API é o <c>container_name</c> do serviço
+/// <c>api</c> nos dois docker-compose.yaml.
 /// </summary>
 public sealed record PersistenceApproach(string Key, string Label, string[] Containers)
 {
+    private const string ApiContainer = "ebenezer-api";
+
     public static PersistenceApproach Parse(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant() switch
     {
         "multimodel" or "multimodelo" or "arangodb" =>
-            new PersistenceApproach("multimodel", "multimodel", ["arangodb"]),
+            new PersistenceApproach("multimodel", "multimodel", [ApiContainer, "arangodb"]),
 
         "heterogeneous" or "heterogeneo" or "heterogêneo" or "mongodb-neo4j" or "mongo-neo4j" =>
-            new PersistenceApproach("heterogeneous", "heterogeneous", ["ebenezer-mongodb", "ebenezer-neo4j"]),
+            new PersistenceApproach("heterogeneous", "heterogeneous", [ApiContainer, "ebenezer-mongodb", "ebenezer-neo4j"]),
 
         _ => throw new ArgumentException(
             $"Abordagem desconhecida: '{value}'. Use: multimodel | heterogeneous.")

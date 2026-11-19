@@ -5,7 +5,7 @@ Suíte de carga para comparação entre as duas abordagens de persistência do T
 - **multimodel** — ArangoDB (banco multimodelo único)
 - **heterogeneous** — MongoDB (documentos) + Neo4j (grafo social)
 
-A suíte mede latência, throughput e consumo de recursos (CPU/RAM dos containers de banco) sob cinco categorias de carga, produzindo um relatório HTML por execução e um CSV de uso de recursos. A mesma suíte roda sem modificação em ambas as branches; só a abordagem muda.
+A suíte mede latência, throughput e consumo de recursos (CPU/RAM dos containers da API e dos bancos) sob cinco categorias de carga, produzindo um relatório HTML por execução e um CSV de uso de recursos. A mesma suíte roda sem modificação em ambas as branches; só a abordagem muda.
 
 ---
 
@@ -98,8 +98,10 @@ Porque ela muda a cada rodada de comparação (você alterna entre as branches) 
 
 Os containers Docker monitorados são derivados automaticamente da abordagem:
 
-- `multimodel` → monitora `arangodb`
-- `heterogeneous` → monitora `ebenezer-mongodb` e `ebenezer-neo4j`
+- `multimodel` → monitora `ebenezer-api` e `arangodb`
+- `heterogeneous` → monitora `ebenezer-api`, `ebenezer-mongodb` e `ebenezer-neo4j`
+
+O container da API (`ebenezer-api`, o `container_name` do serviço `api` nos dois `docker-compose.yaml`) entra nas duas abordagens. Isso mostra se a API chegou ao limite de CPU do container (por exemplo, 400% com `API_CPUS=4`), o que ajuda a distinguir saturação da API de saturação do banco. O CPU% segue a convenção do `docker stats`: 100% equivale a um núcleo.
 
 Assim o config nunca precisa mudar entre branches.
 
@@ -355,6 +357,7 @@ Formato do CSV:
 
 ```
 timestamp,container,cpu_percent,memory_mb
+2026-06-23T14:00:02+00:00,ebenezer-api,38.70,412.00
 2026-06-23T14:00:02+00:00,ebenezer-mongodb,12.34,256.00
 2026-06-23T14:00:04+00:00,ebenezer-mongodb,14.10,257.50
 2026-06-23T14:00:02+00:00,ebenezer-neo4j,4.21,128.50
