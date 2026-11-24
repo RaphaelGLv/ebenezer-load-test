@@ -431,7 +431,7 @@ for r_idx in range(6, 11):
         val = ws_sub.cell(r_idx, c_idx).value
         if isinstance(val, str) and val.startswith("="):
             ws_sub.cell(r_idx, c_idx).value = re.sub(
-                r"\$14:\$([A-Z]+)\$\d+", rf"$14:$\1${ultima_linha_sub}", val
+                r"\$14:\$([A-Z]+)\$\d+", rf"$14:$ ${ultima_linha_sub}", val
             )
 
 # Preenche a aba Uso_Recursos_Timeline (Multimodelo High e Low)
@@ -452,3 +452,22 @@ for i in range(max_tl):
     ws_tl.cell(r_tl, 1, i + 1)
     if i < len(df_tl_high):
         ws_tl.cell(r_tl, 2, float(df_tl_high.loc[i, "min"]))
+        ws_tl.cell(r_tl, 3, round(float(df_tl_high.loc[i, "api_cpu"]), 2))
+        ws_tl.cell(r_tl, 4, round(float(df_tl_high.loc[i, "db_cpu"]), 2))
+        ws_tl.cell(r_tl, 5, round(float(df_tl_high.loc[i, "api_mem"]), 2))
+        ws_tl.cell(r_tl, 6, round(float(df_tl_high.loc[i, "db_mem"]), 2))
+    if i < len(df_tl_low):
+        ws_tl.cell(r_tl, 7, float(df_tl_low.loc[i, "min"]))
+        ws_tl.cell(r_tl, 8, round(float(df_tl_low.loc[i, "api_cpu"]), 2))
+        ws_tl.cell(r_tl, 9, round(float(df_tl_low.loc[i, "db_cpu"]), 2))
+        ws_tl.cell(r_tl, 10, round(float(df_tl_low.loc[i, "api_mem"]), 2))
+        ws_tl.cell(r_tl, 11, round(float(df_tl_low.loc[i, "db_mem"]), 2))
+
+# Cria e preenche a aba Uso_Recursos_Timeline_Het (Heterogênea High e Low)
+create_het_timeline_sheet(wb, het_timeline_sources)
+
+wb.save(EXCEL_PATH)
+print(
+    f"Planilha atualizada com sucesso! "
+    f"({ultima_linha_sub - 13} registros de subcenários + abas de timeline Multimodelo e Heterogênea)"
+)
