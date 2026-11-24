@@ -177,7 +177,7 @@ ScenarioProps Configure(ScenarioProps scenario, int iterationsPerSecond)
         ? scenario.WithWarmUpDuration(TimeSpan.FromSeconds(warmup))
         : scenario.WithoutWarmUp();
 
-    return withWarmUp.WithLoadSimulations(
+    return withWarmUp.WithMaxFailCount(int.MaxValue).WithLoadSimulations(
         Simulation.Inject(
             rate: iterationsPerSecond,
             interval: TimeSpan.FromSeconds(1),
