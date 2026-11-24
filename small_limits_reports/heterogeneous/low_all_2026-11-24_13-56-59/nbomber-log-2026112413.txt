@@ -1,0 +1,14 @@
+2026-11-24 13:56:59.289 -03:00 [INF] [ThreadId:5] NBomber 6.4.1 started a new session: 2026-11-24_16-56-59_75e95e86
+2026-11-24 13:56:59.321 -03:00 [INF] [ThreadId:5] NBomber started as single node
+2026-11-24 13:56:59.323 -03:00 [INF] [ThreadId:5] License validation....
+2026-11-24 13:56:59.323 -03:00 [WRN] [ThreadId:5] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.
+2026-11-24 13:56:59.333 -03:00 [INF] [ThreadId:5] Reports folder: C:\Users\r.leiva_unesp\Documents\tcc\ebenezer-load-test\reports\heterogeneous\low_all_2026-11-24_13-56-59
+2026-11-24 13:56:59.335 -03:00 [INF] [ThreadId:5] Plugins: no plugins were loaded
+2026-11-24 13:56:59.335 -03:00 [INF] [ThreadId:5] Reporting sinks: no reporting sinks were loaded
+2026-11-24 13:56:59.335 -03:00 [INF] [ThreadId:5] Starting init...
+2026-11-24 13:56:59.340 -03:00 [INF] [ThreadId:5] Target scenarios: write_heavy, read_heavy, graph_heavy, document_heavy, mixed_graph_documents
+2026-11-24 13:56:59.341 -03:00 [INF] [ThreadId:5] Init finished
+2026-11-24 13:56:59.352 -03:00 [INF] [ThreadId:5] Starting warm up...
+2026-11-24 13:56:59.353 -03:00 [INF] [ThreadId:5] Warm up for scenarios: write_heavy, read_heavy, graph_heavy, document_heavy, mixed_graph_documents
+2026-11-24 13:56:59.355 -03:00 [INF] [ThreadId:5] Warm up duration: 00:00:30
+2026-11-24 13:57:30.391 -03:00 [INF] [ThreadId:52] Starting bombing...
